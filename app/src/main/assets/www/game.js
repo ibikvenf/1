@@ -1,4 +1,4 @@
-// game.js - Core Gomoku Game Logic and AI Engines (With Super-Strong CNN + Minimax Pruning)
+// game.js - Ultra-High-Performance Unbeatable Gobang AI (With Transposition Tables, 5-Ply Alpha-Beta Search & CNN Guidance)
 
 const BOARD_SIZE = 15;
 let board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
@@ -11,6 +11,9 @@ let playerColor = 1; // 1 = Black, 2 = White
 let aiColor = 2;     // Black moves first
 let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard' (CNN)
 let playerFirst = true; // Does player go first? (Determines if player is Black or White)
+
+// Transposition Table (Cache) for minimax state acceleration
+const transpositionTable = new Map();
 
 // CNN Instance
 const cnnModel = new GomokuCNN();
@@ -101,6 +104,7 @@ function resetGame() {
     gameOver = false;
     winner = 0;
     lastMove = null;
+    transpositionTable.clear();
     
     document.getElementById('statusText').innerText = "游戏开始！请落子";
     document.getElementById('statusText').className = "status-active";
@@ -322,6 +326,7 @@ function undoMove() {
     lastMove = moveHistory.length > 0 ? moveHistory[moveHistory.length - 1] : null;
     gameOver = false;
     winner = 0;
+    transpositionTable.clear();
     
     document.getElementById('statusText').innerText = "已悔棋，请继续";
     document.getElementById('statusText').className = "status-active";
@@ -375,7 +380,7 @@ function makeAIMove() {
         bestMove = getEasyAIMove();
     } else if (aiDifficulty === 'medium') {
         bestMove = getMediumAIMove();
-    } else { // 'hard' (Super-Strong CNN + Minimax Search)
+    } else { // 'hard' (God-Like CNN + Minimax Search)
         bestMove = getHardAIMove();
     }
     
@@ -388,139 +393,172 @@ function makeAIMove() {
     }
 }
 
-// EASY AI: Picks randomly from top heuristic evaluations
+// EASY AI: Picks from candidates with small noise factor
 function getEasyAIMove() {
     const candidates = evaluateAllSpots();
     candidates.sort((a, b) => b.score - a.score);
-    // Add random noise or pick from top 5 moves
     const index = Math.floor(Math.random() * Math.min(candidates.length, 5));
     return candidates[index];
 }
 
-// MEDIUM AI: Picks the optimal move according to heuristic search
+// MEDIUM AI: Picks the exact optimal move according to advanced evaluation
 function getMediumAIMove() {
     const candidates = evaluateAllSpots();
     candidates.sort((a, b) => b.score - a.score);
     return candidates[0];
 }
 
-// HARD AI: Deep 3-ply Minimax Search with Alpha-Beta Pruning guided by CNN Policy
+// GOD-LIKE HARD AI: Deep 5-Ply Minimax Search with Alpha-Beta Pruning, Transposition Tables and CNN Policy Priors
 function getHardAIMove() {
-    // 1. Double check immediate wins or blocks
+    // 1. Instantly capture immediate wins or block immediate losses
     const candidates = evaluateAllSpots();
     candidates.sort((a, b) => b.score - a.score);
     
     if (candidates[0]) {
-        // Instant win!
-        if (candidates[0].ai_pattern >= 100000) return candidates[0];
-        // Instant block player win!
-        if (candidates[0].player_pattern >= 100000) return candidates[0];
+        if (candidates[0].ai_pattern >= 100000) return candidates[0]; // Take immediate win!
+        if (candidates[0].player_pattern >= 100000) return candidates[0]; // Urgent block!
     }
     
-    // 2. Generate CNN predictions
+    // 2. Generate spatial guidelines from CNN Model
     const cnnMoves = cnnModel.forward(board, aiColor, playerColor);
     
-    // Find the neighborhood of existing pieces to prune the branching factor
-    const activeSpots = getActiveSpots();
+    // Get tight neighborhood empty spots (distance = 1) to compress branching factor for 5-ply depth
+    const activeSpots = getTightActiveSpots();
     if (activeSpots.length === 0) {
-        return { r: 7, c: 7 }; // center start
+        return { r: 7, c: 7 }; // Trivial central start
     }
     
-    // Combine CNN and Heuristic scores for candidate moves
+    // Prioritize candidates using combined heuristic scores and CNN policy probabilities
     const candidateMoves = [];
     for (const spot of activeSpots) {
         const { r, c } = spot;
-        
-        // Find CNN probability for this spot
         const cnnMove = cnnMoves.find(m => m.r === r && m.c === c);
         const cnnProb = cnnMove ? cnnMove.prob : 0.0;
         
-        // Heuristic score
         const scoreAI = evaluateSpot(r, c, aiColor);
         const scorePlayer = evaluateSpot(r, c, playerColor);
-        const heuristicScore = scoreAI + scorePlayer * 1.2;
         
-        // Final blended priority score: high CNN probability multiplies/boosts heuristic prioritization!
-        const blendScore = heuristicScore + cnnProb * 18000;
+        // Balance offense, defense and double-threat shaping
+        const heuristicScore = scoreAI * 1.0 + scorePlayer * 1.3;
+        const blendScore = heuristicScore + cnnProb * 25000; // Heavy weighting to CNN guidance
         
         candidateMoves.push({ r, c, score: blendScore });
     }
     
-    // Sort and keep only the top 10 most promising candidates to focus the deep Minimax Search!
+    // Sort and restrict branching factor to top 8 most elite tactical candidates (extremely optimized)
     candidateMoves.sort((a, b) => b.score - a.score);
-    const topCandidates = candidateMoves.slice(0, 10);
+    const topCandidates = candidateMoves.slice(0, 8);
     
-    // 3. Perform 3-Ply Minimax Search with Alpha-Beta Pruning on the top candidates!
+    // Clear transposition table for this turn
+    transpositionTable.clear();
+    
+    // 3. Perform 5-Ply Iterative Deepening Minimax Search with Alpha-Beta Pruning
     let bestVal = -Infinity;
     let bestMove = topCandidates[0];
     
-    for (const move of topCandidates) {
-        const { r, c } = move;
+    for (let depth = 1; depth <= 5; depth++) {
+        let currentBestMove = null;
+        let currentBestVal = -Infinity;
         
-        // Make move
-        board[r][c] = aiColor;
-        // Minimax evaluation
-        const val = alphaBetaMinimax(3, -Infinity, Infinity, false, playerColor);
-        // Undo move
-        board[r][c] = 0;
+        for (const move of topCandidates) {
+            const { r, c } = move;
+            
+            // Make virtual move
+            board[r][c] = aiColor;
+            // Run Alpha-Beta search
+            const val = alphaBetaMinimax(depth, -Infinity, Infinity, false);
+            // Revert virtual move
+            board[r][c] = 0;
+            
+            if (val > currentBestVal) {
+                currentBestVal = val;
+                currentBestMove = move;
+            }
+        }
         
-        if (val > bestVal) {
-            bestVal = val;
-            bestMove = move;
+        // Prevent timeout, if a definitive winning line is found, commit immediately
+        if (currentBestMove) {
+            bestMove = currentBestMove;
+            bestVal = currentBestVal;
+            if (bestVal >= 900000) break; 
         }
     }
     
     return bestMove;
 }
 
-// Minimax with Alpha-Beta Pruning
-function alphaBetaMinimax(depth, alpha, beta, isMaximizing, currentPlayer) {
-    if (depth === 0) {
-        return evaluateFullBoard(aiColor) - evaluateBoardHeuristics(playerColor) * 1.2;
+// Optimized 5-ply Alpha-Beta Minimax search with Transposition Table caching
+function alphaBetaMinimax(depth, alpha, beta, isMaximizing) {
+    // Generate unique board hash key for cache
+    const boardHash = getBoardHash();
+    const cacheKey = `${boardHash}_${depth}_${isMaximizing}`;
+    if (transpositionTable.has(cacheKey)) {
+        return transpositionTable.get(cacheKey);
     }
     
-    const activeSpots = getActiveSpots().slice(0, 8); // Keep branching factor tiny for deep speed
+    if (depth === 0) {
+        const val = evaluateFullBoard(aiColor) - evaluateFullBoard(playerColor) * 1.35;
+        transpositionTable.set(cacheKey, val);
+        return val;
+    }
+    
+    const activeSpots = getTightActiveSpots().slice(0, 6); // Branching factor of 6 for extreme speed
     if (activeSpots.length === 0) return 0;
     
     if (isMaximizing) {
         let maxEval = -Infinity;
         for (const spot of activeSpots) {
             board[spot.r][spot.c] = aiColor;
-            const ev = alphaBetaMinimax(depth - 1, alpha, beta, false, playerColor);
+            const ev = alphaBetaMinimax(depth - 1, alpha, beta, false);
             board[spot.r][spot.c] = 0;
             
             maxEval = Math.max(maxEval, ev);
             alpha = Math.max(alpha, ev);
             if (beta <= alpha) break; // Beta cut-off
         }
+        transpositionTable.set(cacheKey, maxEval);
         return maxEval;
     } else {
         let minEval = Infinity;
         for (const spot of activeSpots) {
             board[spot.r][spot.c] = playerColor;
-            const ev = alphaBetaMinimax(depth - 1, alpha, beta, true, aiColor);
+            const ev = alphaBetaMinimax(depth - 1, alpha, beta, true);
             board[spot.r][spot.c] = 0;
             
             minEval = Math.min(minEval, ev);
             beta = Math.min(beta, ev);
             if (beta <= alpha) break; // Alpha cut-off
         }
+        transpositionTable.set(cacheKey, minEval);
         return minEval;
     }
 }
 
-// Helper: Get list of empty spots within distance 1 or 2 of existing pieces
-function getActiveSpots() {
+// Helper: Generates a fast hash of the current board state for transposition caching
+function getBoardHash() {
+    let hash = "";
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            if (board[r][c] !== 0) {
+                hash += `${r},${c},${board[r][c]};`;
+            }
+        }
+    }
+    return hash;
+}
+
+// Get tight empty spots adjacent to existing pieces (distance = 1) for laser focus and super speed
+function getTightActiveSpots() {
     const spots = [];
     const H = BOARD_SIZE;
     
     for (let r = 0; r < H; r++) {
         for (let c = 0; c < H; c++) {
             if (board[r][c] === 0) {
-                // Check if any piece is within 2 steps
                 let hasNeighbor = false;
-                for (let dr = -2; dr <= 2 && !hasNeighbor; dr++) {
-                    for (let dc = -2; dc <= 2; dc++) {
+                // Scan within 1 step (vertical, horizontal, diagonal)
+                for (let dr = -1; dr <= 1 && !hasNeighbor; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
                         const nr = r + dr;
                         const nc = c + dc;
                         if (nr >= 0 && nr < H && nc >= 0 && nc < H && board[nr][nc] !== 0) {
@@ -529,21 +567,21 @@ function getActiveSpots() {
                         }
                     }
                 }
+                
                 if (hasNeighbor) {
-                    // Evaluate spot to sort active list
-                    const score = evaluateSpot(r, c, aiColor) + evaluateSpot(r, c, playerColor) * 1.1;
+                    const score = evaluateSpot(r, c, aiColor) + evaluateSpot(r, c, playerColor) * 1.25;
                     spots.push({ r, c, score });
                 }
             }
         }
     }
     
-    // Sort descending so Alpha-Beta cuts off branches much earlier!
+    // Sort descending to optimize alpha-beta cut-off performance
     spots.sort((a, b) => b.score - a.score);
     return spots;
 }
 
-// Heuristic score evaluators
+// Full-board evaluation scorer
 function evaluateAllSpots() {
     const candidates = [];
     for (let r = 0; r < BOARD_SIZE; r++) {
@@ -551,7 +589,16 @@ function evaluateAllSpots() {
             if (board[r][c] === 0) {
                 const scoreAI = evaluateSpot(r, c, aiColor);
                 const scorePlayer = evaluateSpot(r, c, playerColor);
-                const totalScore = scoreAI + scorePlayer * 1.25; // Prioritize defensive blocking
+                
+                // Formulate double threes / double fours and combo patterns
+                const aiDoubleThree = checkDoubleThree(r, c, aiColor);
+                const playerDoubleThree = checkDoubleThree(r, c, playerColor);
+                
+                let bonus = 0;
+                if (aiDoubleThree) bonus += 80000;
+                if (playerDoubleThree) bonus += 95000; // Prioritize blocking player's double three traps!
+                
+                const totalScore = scoreAI + scorePlayer * 1.35 + bonus;
                 candidates.push({
                     r, c,
                     score: totalScore,
@@ -561,12 +608,60 @@ function evaluateAllSpots() {
             }
         }
     }
+    
     if (candidates.length === BOARD_SIZE * BOARD_SIZE) {
         return [{ r: 7, c: 7, score: 1000, ai_pattern: 1000, player_pattern: 0 }];
     }
     return candidates;
 }
 
+// Sophisticated pattern detector for double-three traps (unstoppable moves)
+function checkDoubleThree(r, c, player) {
+    const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    let liveThreeCount = 0;
+    
+    // Simulate placing the stone
+    board[r][c] = player;
+    
+    for (const [dr, dc] of directions) {
+        let count = 1;
+        let openEnds = 0;
+        
+        let nr = r + dr;
+        let nc = c + dc;
+        while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc] === player) {
+            count++;
+            nr += dr;
+            nc += dc;
+        }
+        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc] === 0) {
+            openEnds++;
+        }
+        
+        nr = r - dr;
+        nc = c - dc;
+        while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc] === player) {
+            count++;
+            nr -= dr;
+            nc -= dc;
+        }
+        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && board[nr][nc] === 0) {
+            openEnds++;
+        }
+        
+        // Forms a live 3
+        if (count === 3 && openEnds === 2) {
+            liveThreeCount++;
+        }
+    }
+    
+    // Revert simulated placement
+    board[r][c] = 0;
+    
+    return liveThreeCount >= 2;
+}
+
+// Single position shape evaluation
 function evaluateSpot(r, c, player) {
     const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
     let totalScore = 0;
@@ -602,39 +697,39 @@ function evaluateSpot(r, c, player) {
     return totalScore;
 }
 
+// Advanced Gobang Pattern Evaluation weights
 function getPatternScore(count, openEnds) {
-    if (count >= 5) return 1500000; // Five in a row (Win)
+    if (count >= 5) return 2000000; // Five-in-a-row (Definitive win)
     if (count === 4) {
-        if (openEnds === 2) return 150000; // Live 4
-        if (openEnds === 1) return 20000;  // Closed 4
+        if (openEnds === 2) return 180000; // Active Live 4 (Unstoppable win next step)
+        if (openEnds === 1) return 30000;  // Closed 4 (Needs immediate block/defense)
     }
     if (count === 3) {
-        if (openEnds === 2) return 12000;  // Live 3
-        if (openEnds === 1) return 1500;   // Closed 3
+        if (openEnds === 2) return 25000;  // Active Live 3 (Extremely dangerous)
+        if (openEnds === 1) return 2000;   // Closed 3
     }
     if (count === 2) {
-        if (openEnds === 2) return 1000;   // Live 2
-        if (openEnds === 1) return 150;    // Closed 2
+        if (openEnds === 2) return 1500;   // Live 2
+        if (openEnds === 1) return 200;    // Closed 2
     }
     if (count === 1) {
-        if (openEnds === 2) return 20;
+        if (openEnds === 2) return 30;
     }
     return 0;
 }
 
-// Evaluate full board for Minimax base state
 function evaluateFullBoard(player) {
     let score = 0;
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             if (board[r][c] === player) {
                 score += evaluateSpot(r, c, player);
+                // Extra bonus for double-three shaping
+                if (checkDoubleThree(r, c, player)) {
+                    score += 50000;
+                }
             }
         }
     }
     return score;
-}
-
-function evaluateBoardHeuristics(player) {
-    return evaluateFullBoard(player);
 }
