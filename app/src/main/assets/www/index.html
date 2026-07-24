@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智能神经网络五子棋</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <h1>智能<span>五子棋</span></h1>
+            <p>人机对战 · 三档难度 · 神经网络 AI</p>
+        </header>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span id="statusText" class="status-active">游戏开始！请落子</span>
+        </div>
+
+        <!-- Board Game Arena -->
+        <div class="board-container">
+            <canvas id="boardCanvas"></canvas>
+        </div>
+
+        <!-- Configuration Panel -->
+        <div class="config-panel">
+            <div class="control-group">
+                <label for="playerFirstSelect">先手/后手</label>
+                <select id="playerFirstSelect">
+                    <option value="player">我执黑 (先手)</option>
+                    <option value="ai">电脑执黑 (后手)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="difficultySelect">人机难度</label>
+                <select id="difficultySelect">
+                    <option value="easy">简单 (休闲启发)</option>
+                    <option value="medium" selected>中等 (博弈搜索)</option>
+                    <option value="hard">困难 (CNN 神经网络)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div class="actions-panel">
+            <button id="undoBtn" class="btn-secondary">
+                <span>⟲</span> 悔棋
+            </button>
+            <button id="restartBtn" class="btn-primary">
+                <span>↻</span> 重新开始
+            </button>
+            <button id="helpBtn" class="btn-secondary">
+                <span>ℹ</span> 游戏说明
+            </button>
+        </div>
+    </div>
+
+    <!-- Help Modal Dialog -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <h2>五子棋人机大战说明</h2>
+            
+            <p><strong>一、基本规则：</strong></p>
+            <p>棋盘大小为 15×15。黑子先手，白子后手。任何一方率先在横、竖、斜、反斜任意方向连成连续的 <strong>5 颗棋子</strong> 即可获胜。</p>
+            
+            <p><strong>二、人机难度介绍：</strong></p>
+            <ul>
+                <li><strong>简单难度：</strong> 电脑采用启发式打分并加入随机扰动，防守较松，适合新手和娱乐体验。</li>
+                <li><strong>中等难度：</strong> 采用经典的高级博弈评估算法。全面侦测棋盘中的双三、活四、冲四等关键局势，防守积极，攻守兼备，具有极高强度。</li>
+                <li><strong>困难难度（CNN 神经网络）：</strong> 💡 <strong>核心亮点！</strong> 采用内置的<strong>开源卷积神经网络 (CNN) 模型</strong>。将当前棋盘的黑白棋分布编码为双通道矩阵输入，通过两个 2D 卷积层（8通道）抽取空间线索、一个全连接策略头映射特征，直接输出 15×15 概率落子分布。同时结合实时胜率启发剪枝，模拟真实深度神经网络下棋风格，大局观极佳，是终极挑战！</li>
+            </ul>
+
+            <p><strong>三、特殊功能：</strong></p>
+            <ul>
+                <li><strong>先手后手：</strong> 您可以在开局前自由配置自己是先手执黑还是后手执白。</li>
+                <li><strong>无限悔棋：</strong> 支持自由撤销任意步骤，方便您在遇到精妙局势时倒退研究最优解。</li>
+                <li><strong>3D 视觉与音效：</strong> 棋子具备拟真 3D 浮雕质感，内置高品质数字音频发生器，提供沉浸式的棋子碰撞体验（完全无需网络连接）。</li>
+            </ul>
+
+            <div class="modal-footer">
+                <button id="closeHelp" class="btn-primary" style="flex: 0 0 120px;">我知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Game JavaScript modules -->
+    <script src="audio.js"></script>
+    <script src="nn_model.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
