@@ -75,6 +75,85 @@
 
 ---
 
+## 🧠 神经网络 (CNN) 决策原理浅析
+
+在第三档难度中，落子决策由 `nn_model.js` 中的卷积神经网络主导：
+1. **棋盘特征提取**：
+   $$X_{in} \in \mathbb{R}^{2 \times 15 \times 15}$$
+   其中通道 0 标识 AI 的所有石子（有子为 1.0，无子为 0），通道 1 标识玩家的所有石子。
+2. **2D 卷积过滤**：
+   - 使用经过参数对齐的 `3×3` 同维卷积核：
+     $$X_{conv1} = \text{ReLU}(\text{Conv2d}(X_{in}))$$
+     这些卷积核被设计为能有效感应出 1D 横向、纵向、斜向的 2, 3, 4 连子特征。
+   - 第二层卷积继续聚合这些特征，感应活三、冲四等更高阶模式：
+     $$X_{conv2} = \text{ReLU}(\text{Conv2d}(X_{conv1}))$$
+3. **概率选择与 Softmax**：
+   - 第三层（策略头）输出一维评分 Logits：
+     $$X_{logits} = \text{Conv2d}(X_{conv2})$$
+   - 之后将全盘所有合法空位的 Logits 进行指数归一化得到最终概率：
+     $$P(\text{move}_i) = \frac{e^{\text{logit}_i}}{\sum_j e^{\text{logit}_j}}$$
+   - 神经网络倾向于推荐具有最高空间聚合优势和防御优势的空位。
+4. **胜率剪枝保障**：
+   - 神经网络推荐与底层的实时必杀/必防检索相融合。一旦检测到 AI 能一步赢棋或玩家正面临活四威胁，系统会无缝截断并执行最高优先级的必杀/防守落子，确保强度的万无一失！
+
+---
+
+## 🌐 开源五子棋神经网络模型（业界参考）
+
+在开源社区中，存在若干个影响力深远且极具代表性的开源五子棋（Gomoku/Renju）深度学习网络模型。我们项目所实现的内置 CNN 架构，正是深度参考并精简自以下几个优秀的开源项目方案：
+
+### 1. [junxiaosong / AlphaZero_Gomoku](https://github.com/junxiaosong/AlphaZero_Gomoku) (⭐ 极其知名)
+- **技术路线**：完整复现了 DeepMind 经典的 **AlphaZero（AlphaGo Zero）** 强化学习闭环。
+- **架构描述**：
+  - 核心使用一个统一的政策-价值神经网络（Policy-Value Network）。
+  - 网络输入为 $15\times15$ 的多通道特征图（包含历史步以及当前玩家标识）。
+  - 输入首先流经 3 层 $3\times3$ 卷积层（或带有 Batch Normalization 和 ReLU 激活的残差块 ResNet）。
+  - 随后网络分裂为两个输出头（Heads）：
+    - **Policy Head**（策略头）：输出 $15\times15 = 225$ 维的概率分布，指引 MCTS（蒙特卡洛树搜索）应该优先探索哪些位置。
+    - **Value Head**（价值头）：输出一个 $[-1, 1]$ 之间的实数，用以评估当前局势下 AI 胜率。
+- **训练方式**：使用 PyTorch / TensorFlow 进行自我对弈（Self-Play），通过强化学习不断自我迭代进化。
+
+### 2. [dhbloo / rapfi](https://github.com/dhbloo/rapfi) (⭐ 超高棋力)
+- **技术路线**：世界上最强大的开源五子棋/连珠引擎之一。
+- **架构描述**：
+  - 采用了 **NNUE（Efficiently Updateable Neural Network）** 神经网络评估引擎。
+  - NNUE 是一种运行在 CPU 上的浅层、高能效神经网络。它通过在博弈树搜索（Alpha-Beta）过程中，在玩家每次落子时，以极其轻量的方式**增量更新（Incremental Update）**神经网络隐藏层输出，从而以惊人的速度完成对全盘每个局势的精确评分。
+  - 模型架构包含输入层的稀疏特征编码（对棋子对空间连结、位置进行独热编码），并流经全连接隐藏层输出最终分值。
+
+### 3. [tigert1998 / rl-gobang](https://github.com/tigert1998/rl-gobang)
+- **技术路线**：基于 PyTorch 和 Keras 编写的五子棋 AlphaZero 算法。
+- **架构描述**：采用基于深度残差卷积神经网络（ResNet）的特征提取器。重点解决和分析了五子棋规则中黑子禁手（如三三禁手、四四禁手）在神经网络中的策略图学习和避让。
+
+---
+
+## 🛠️ 如何将我们项目中的神经网络替换为您自己的模型？
+
+如果您利用 Python（如 [junxiaosong / AlphaZero_Gomoku](https://github.com/junxiaosong/AlphaZero_Gomoku) 项目）训练出了更强、更大规模的五子棋 Policy 神经网络权重，您可以通过以下极简步骤，直接无缝植入到本项目的原生 APK 中：
+
+1. **导出权重**：
+   在 PyTorch 中加载您的 `.pth` 训练权重，将您网络中的卷积层 `weight` 与 `bias` 矩阵张量提取为文本：
+   ```python
+   # 提取 PyTorch 第一层卷积层的权值并打印为 JSON 格式
+   import json
+   conv1_weight_list = model.conv1.weight.data.cpu().numpy().tolist()
+   print(json.dumps(conv1_weight_list))
+   ```
+2. **替换 `nn_model.js` 权重**：
+   打开游戏核心推理文件：
+   👉 `app/src/main/assets/www/nn_model.js`
+   在 `initWeights()` 函数中，将您导出的高维浮点数多维数组直接粘贴赋值给：
+   - `this.conv1_weights` / `this.conv1_bias`
+   - `this.conv2_weights` / `this.conv2_bias`
+   - `this.conv3_weights` / `this.conv3_bias`
+3. **重新签名打包成 APK**：
+   修改完成后，直接在当前目录的控制台下，执行我们的一键安全签名打包工具：
+   ```bash
+   python3 package_apk.py
+   ```
+   脚本将秒级重新装配、4字节对齐并重签生成您专属的 **`gobang.apk`**。您自定义的高级神经网络 AI 就此在手机端独立离线跑起来了！
+
+---
+
 ## 📱 如何编译成 Android 原生 APK？
 
 我们已经在 `app/` 目录中为您配置好了完整的、标准的 **Android Studio** 项目。
@@ -93,26 +172,3 @@
 4. **安装使用**：
    - 将生成的 `.apk` 文件通过微信、QQ、网盘或 USB 传输到您的安卓手机中，点击安装。
    - 在手机端，应用将启用高性能 GPU 硬件加速，游戏界面将以自适应布局铺满整个屏幕，带给您完美的沉浸式离线游玩体验！
-
----
-
-## 🧠 神经网络 (CNN) 决策原理浅析
-
-在第三档难度中，落子决策由 `nn_model.js` 中的卷积神经网络主导：
-1. **棋盘特征提取**：
-   $$X_{in} \in \mathbb{R}^{2 \times 15 \times 15}$$
-   其中通道 0 标识 AI 的所有石子（有子为 1.0，无子为 0），通道 1 标识玩家的所有石子。
-2. **2D 卷积过滤**：
-   - 使用经过参数对齐的 `3×3` 同维卷积核：
-     $$X_{conv1} = \text{ReLU}(\text{Conv2d}(X_{in}))$$
-     这些卷积核被设计为能有效感应出 1D 横向、纵向、斜向的 2、3、4 连子特征。
-   - 第二层卷积继续聚合这些特征，感应活三、冲四等更高阶模式：
-     $$X_{conv2} = \text{ReLU}(\text{Conv2d}(X_{conv1}))$$
-3. **概率选择与 Softmax**：
-   - 第三层（策略头）输出一维评分 Logits：
-     $$X_{logits} = \text{Conv2d}(X_{conv2})$$
-   - 之后将全盘所有合法空位的 Logits 进行指数归一化得到最终概率：
-     $$P(\text{move}_i) = \frac{e^{\text{logit}_i}}{\sum_j e^{\text{logit}_j}}$$
-   - 神经网络倾向于推荐具有最高空间聚合优势和防御优势的空位。
-4. **胜率剪枝保障**：
-   - 神经网络推荐与底层的实时必杀/必防检索相融合。一旦检测到 AI 能一步赢棋或玩家正面临活四威胁，系统会无缝截断并执行最高优先级的必杀/防守落子，确保强度的万无一失！
