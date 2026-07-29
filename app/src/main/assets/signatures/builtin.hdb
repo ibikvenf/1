@@ -1,0 +1,3 @@
+# AegisAV built-in signatures (ClamAV .hdb format: MD5:Size:Name)
+44d88612fea8a8f36de82e1278abb02f:*:Eicar-Test-Signature
+03780f3d02898a42f41880176c4f52e2:*:Aegis-Test-Signature

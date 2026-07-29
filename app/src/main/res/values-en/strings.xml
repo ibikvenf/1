@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AegisAV</string>
+
+    <string name="channel_scan">Virus Scan</string>
+    <string name="channel_scan_desc">Scan progress and results</string>
+    <string name="channel_guard">Real-time protection</string>
+    <string name="channel_alerts">Threat alerts</string>
+    <string name="channel_alerts_desc">Alerts when malware or risky apps are found</string>
+
+    <string name="home_tagline">On-device engine · Signatures · Zero upload</string>
+    <string name="btn_quick_scan">Quick Scan</string>
+    <string name="quick_scan_desc">Apps + Downloads/Documents hot spots</string>
+    <string name="btn_full_scan">Full Scan</string>
+    <string name="full_scan_desc">Apps + all shared storage files</string>
+    <string name="perm_banner_text">File access not granted — file scanning is disabled</string>
+    <string name="btn_grant_storage">Grant</string>
+    <string name="status_protected">Protected</string>
+    <string name="status_partial">A full scan is recommended</string>
+    <string name="status_first_run">Never scanned — run your first scan now</string>
+    <string name="status_no_permission">Protection inactive: no file permission</string>
+    <string name="last_scan_fmt">Last scan: %1$s</string>
+    <string name="last_scan_never">Never scanned</string>
+    <string name="realtime_title">Real-time protection</string>
+    <string name="realtime_desc">Watches file writes and new apps, alerts instantly</string>
+    <string name="db_card_title">Signature database</string>
+    <string name="db_info_fmt">%1$d signatures · updated %2$s</string>
+    <string name="db_info_builtin_fmt">%1$d bundled signatures · not updated online yet</string>
+    <string name="update_db">Update now</string>
+    <string name="updating">Updating…</string>
+    <string name="feature_apps">App risk audit</string>
+    <string name="feature_apps_desc">Dangerous-permission profiling</string>
+    <string name="feature_quarantine">Quarantine</string>
+    <string name="feature_quarantine_desc">Isolated suspicious files</string>
+    <string name="feature_history">Scan history</string>
+    <string name="feature_history_desc">Previous scans</string>
+    <string name="feature_update">Database manager</string>
+    <string name="feature_update_desc">Sources &amp; online updates</string>
+    <string name="feature_settings_desc">Engine &amp; database settings</string>
+    <string name="btn_eicar_help">How to test detection?</string>
+    <string name="eicar_title">Use the EICAR test file</string>
+    <string name="eicar_message">Download the harmless EICAR standard test file from eicar.org into Downloads and scan — it should be reported as “Eicar-Test-Signature”. The bundled database also contains a demo signature Aegis-Test-Signature.</string>
+
+    <string name="title_scan">Virus scan</string>
+    <string name="scan_preparing">Preparing…</string>
+    <string name="scan_running_title">Scanning for malware</string>
+    <string name="phase_apps">Scanning installed apps</string>
+    <string name="phase_files">Scanning files</string>
+    <string name="scan_counts_fmt">Apps %1$d · Files %2$d · Threats %3$d</string>
+    <string name="scan_finished">Scan finished</string>
+    <string name="scan_cancelled">Cancelled</string>
+    <string name="scan_finished_fmt">%1$d apps · %2$d files · %3$d threats found</string>
+    <string name="cancel">Cancel</string>
+    <string name="stop">Stop</string>
+    <string name="view_results_with_count">View results (%1$d threats)</string>
+    <string name="auto_close_hint">No threats found — you are all set</string>
+
+    <string name="title_results">Scan results</string>
+    <string name="empty_results">No threats found. Your device is safe 🛡</string>
+    <string name="level_malware">Malware</string>
+    <string name="level_high">High risk</string>
+    <string name="level_medium">Medium</string>
+    <string name="level_low">Low</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirm_title">Delete this file?</string>
+    <string name="delete_confirm_msg">%1$s</string>
+    <string name="btn_quarantine_action">Quarantine</string>
+    <string name="btn_ignore_action">Ignore</string>
+    <string name="toast_quarantined">Moved to quarantine</string>
+    <string name="toast_deleted">Deleted</string>
+    <string name="toast_ignored">Added to ignore list</string>
+    <string name="toast_restored">Restored</string>
+    <string name="toast_action_failed">Action failed</string>
+    <string name="threat_risk_app">Risky app (heuristic)</string>
+    <string name="risk_detail_fmt">App: %1$s · score %2$d\n%3$s</string>
+    <string name="threat_file_detail_fmt">File: %1$s\nSHA-256: %2$s</string>
+    <string name="threat_app_detail_fmt">App: %1$s (%2$s)\nSHA-256: %3$s</string>
+
+    <string name="alert_threats_found_title">Threats detected!</string>
+    <string name="alert_threats_found_fmt">%1$d threats found in this scan. Top: %2$s. Tap to handle.</string>
+    <string name="alert_realtime_title">Real-time protection blocked</string>
+    <string name="alert_realtime_fmt">Detected %1$s\n%2$s</string>
+    <string name="alert_new_app_title">Newly installed app is a threat</string>
+    <string name="alert_new_app_fmt">%1$s matches %2$s. Uninstall is recommended.</string>
+
+    <string name="guard_running_title">Real-time protection ON</string>
+    <string name="guard_running_text">Monitoring storage writes and new apps</string>
+
+    <string name="title_apps">App risk audit</string>
+    <string name="audit_summary_fmt">%1$d items of concern · high %2$d · medium %3$d</string>
+    <string name="audit_score_fmt">Score %1$d</string>
+    <string name="audit_pkg_fmt">Package: %1$s</string>
+    <string name="audit_installer_fmt">Installer: %1$s</string>
+    <string name="unknown_source">Unknown</string>
+
+    <string name="title_history">Scan history</string>
+    <string name="empty_history">No history yet</string>
+    <string name="btn_clear_history">Clear history</string>
+    <string name="history_item_fmt">%1$s · apps %2$d · files %3$d · threats %4$d · %5$ds</string>
+
+    <string name="title_update">Database manager</string>
+    <string name="sources_title">Signature sources</string>
+    <string name="btn_add_source">Add source</string>
+    <string name="btn_update_now">Update now</string>
+    <string name="add_source_title">Add signature source</string>
+    <string name="source_name_hint">Name</string>
+    <string name="source_url_hint">URL (ClamAV .hsb/.hdb)</string>
+    <string name="add">Add</string>
+    <string name="source_remove">Remove</string>
+    <string name="update_no_sources">No enabled sources. The bundled database always applies.</string>
+    <string name="update_result_title">Update results</string>
+    <string name="update_status_updated">Updated (%1$s)</string>
+    <string name="update_status_not_modified">Up to date</string>
+    <string name="update_status_skipped">Skipped (disabled)</string>
+    <string name="update_status_failed">Failed: %1$s</string>
+
+    <string name="title_quarantine">Quarantine</string>
+    <string name="empty_quarantine">Quarantine is empty</string>
+    <string name="quarantine_path_fmt">Original path: %1$s</string>
+    <string name="btn_restore">Restore</string>
+
+    <string name="title_settings">Settings</string>
+    <string name="settings_heuristics">Heuristic detection</string>
+    <string name="settings_heuristics_desc">Score apps by dangerous permission combos when no signature matches</string>
+    <string name="settings_system_apps">Scan system apps</string>
+    <string name="settings_system_apps_desc">Skipped by default to save time and reduce false positives</string>
+    <string name="settings_auto_update">Auto-update database on launch</string>
+    <string name="settings_auto_update_desc">Only applies to enabled sources</string>
+    <string name="settings_max_file">Max file size</string>
+    <string name="settings_max_file_value">%1$d MB</string>
+    <string name="settings_system_settings">System app settings</string>
+    <string name="settings_about_title">About AegisAV</string>
+    <string name="settings_about_text">Fully offline on-device engine: single-pass MD5/SHA-1/SHA-256 hashing, ClamAV-compatible signature databases; files never leave the device. Architecture inspired by the open-source Divested-Mobile/Hypatia project; code here is an original implementation.</string>
+    <string name="settings_version_fmt">Version %1$s</string>
+</resources>
