@@ -3,6 +3,19 @@
 一款**完全离线、本地查杀**的 Android 杀毒软件。
 架构思路参考了世界首个开源 Android 杀软 [Divested-Mobile/Hypatia](https://github.com/Divested-Mobile/Hypatia)（GPL，ClamAV 签名驱动），本项目代码为原创实现。
 
+## 📦 安装包下载（CI 自动构建）
+
+仓库配置了 GitHub Actions（`.github/workflows/android.yml`），每次推送自动：
+**跑单元测试 → 编译 Debug APK → 上传工件**
+
+下载方式（任选其一）：
+
+1. **Actions 工件**：打开仓库 `Actions` 选项卡 → 选择最新成功构建 → 页面底部 `aegisav-debug-apk` 下载解压即得 `app-debug.apk`
+2. **命令行**（已登录 `gh`）：`gh run download -n aegisav-debug-apk`
+3. **本地构建**：Android Studio 打开本仓库 → `Build ▸ Build APK(s)`
+
+> Debug 包使用调试证书签名，安装时允许"未知来源"即可；正式上架请自行配置 release 签名。
+
 ## 核心特性
 
 | 模块 | 能力 |
