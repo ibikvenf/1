@@ -105,7 +105,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 开机 / 应用升级后恢复实时防护 -->
+        <!-- 开机 / 应用升级后恢复实时防护与定时查杀 -->
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true">
@@ -114,6 +114,11 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- 每日定时查杀（AlarmManager 显式 PendingIntent，无需导出） -->
+        <receiver
+            android:name=".receiver.ScheduledScanReceiver"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

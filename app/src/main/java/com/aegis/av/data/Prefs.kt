@@ -18,6 +18,7 @@ object Prefs {
     private const val KEY_DB_UPDATED = "db_last_update"
     private const val KEY_SOURCES = "db_sources"
     private const val KEY_INCREMENTAL = "incremental_quick"
+    private const val KEY_DAILY_SCAN = "daily_auto_scan"
 
     private lateinit var prefs: SharedPreferences
 
@@ -47,6 +48,11 @@ object Prefs {
     var incrementalQuick: Boolean
         get() = p.getBoolean(KEY_INCREMENTAL, true)
         set(v) = p.edit().putBoolean(KEY_INCREMENTAL, v).apply()
+
+    /** 每天凌晨自动全盘查杀（AlarmManager 不精确闹钟，省电不打扰）。 */
+    var autoScanDaily: Boolean
+        get() = p.getBoolean(KEY_DAILY_SCAN, false)
+        set(v) = p.edit().putBoolean(KEY_DAILY_SCAN, v).apply()
 
     /** 超过该大小的文件跳过（避免超大文件拖慢扫描）。 */
     var maxFileMb: Int

@@ -39,6 +39,31 @@ class ScanActivity : AppCompatActivity() {
         }
     }
 
+    private var lastSampleTime = 0L
+    private var lastSampleTotal = 0
+
+    /** 每秒一次的吞吐估算（应用×10 + 文件数）。 */
+    private fun speedSuffix(s: com.aegis.av.data.ScanUiState): String {
+        if (!s.running) {
+            lastSampleTime = 0L
+            lastSampleTotal = 0
+            return ""
+        }
+        val now = System.currentTimeMillis()
+        val total = s.scannedFiles + s.scannedApps * 10
+        if (lastSampleTime == 0L || now - lastSampleTime < 1000) {
+            if (lastSampleTime == 0L) {
+                lastSampleTime = now
+                lastSampleTotal = total
+            }
+            return ""
+        }
+        val speed = (total - lastSampleTotal).toLong() * 1000 / (now - lastSampleTime)
+        lastSampleTime = now
+        lastSampleTotal = total
+        return getString(R.string.scan_speed_fmt, speed)
+    }
+
     private fun render(s: com.aegis.av.data.ScanUiState) {
         if (!s.running && !s.finished) return // 尚无扫描
 
@@ -53,7 +78,7 @@ class ScanActivity : AppCompatActivity() {
         b.tvCounts.text = getString(
             R.string.scan_counts_fmt,
             s.scannedApps, s.scannedFiles, s.threatCount,
-        )
+        ) + speedSuffix(s)
 
         if (s.totalEstimate > 0) {
             b.progress.isIndeterminate = false

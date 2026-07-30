@@ -21,7 +21,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 实时防护：借鉴 Hypatia 的"递归 FileObserver"方案，
@@ -33,6 +32,7 @@ class RealtimeService : Service() {
         const val ACTION_STOP_GUARD = "com.aegis.av.action.STOP_GUARD"
 
         private const val MAX_DEPTH = 5
+        private const val MAX_OBSERVERS = 2048
 
         // infix or 不是编译期常量表达式，因此用普通 val
         private val EVENT_MASK = FileObserver.CLOSE_WRITE or FileObserver.MOVED_TO or
@@ -53,7 +53,10 @@ class RealtimeService : Service() {
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val observers = ConcurrentHashMap<String, FileObserver>()
+
+    /** 目录观察器注册表（有序，超过上限时淘汰最旧条目，防止内存膨胀）。 */
+    private val observers = LinkedHashMap<String, FileObserver>()
+    private val obsLock = Any()
     private val engine by lazy { ScannerEngine(this) }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -70,10 +73,16 @@ class RealtimeService : Service() {
     }
 
     private fun shutdown() {
-        observers.values.forEach { runCatching { it.stopWatching() } }
-        observers.clear()
+        stopAllObservers()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
+    }
+
+    private fun stopAllObservers() {
+        synchronized(obsLock) {
+            observers.values.forEach { runCatching { it.stopWatching() } }
+            observers.clear()
+        }
     }
 
     // ------------------------- 递归 FileObserver -------------------------
@@ -83,7 +92,7 @@ class RealtimeService : Service() {
     }
 
     private fun attachRecursive(dir: File, depth: Int) {
-        if (depth > MAX_DEPTH || observers.size > 2048) return
+        if (depth > MAX_DEPTH) return
         attach(dir)
         val children = runCatching { dir.listFiles() }.getOrNull() ?: return
         for (c in children) {
@@ -93,9 +102,17 @@ class RealtimeService : Service() {
 
     private fun attach(dir: File) {
         val path = dir.absolutePath
-        if (observers.containsKey(path)) return
+        if (synchronized(obsLock) { observers.containsKey(path) }) return
         val obs = createObserver(dir)
-        observers[path] = obs
+        synchronized(obsLock) {
+            // LRU 淘汰：超过上限移除最早注册的目录观察器
+            while (observers.size >= MAX_OBSERVERS) {
+                val eldest = observers.entries.first()
+                observers.remove(eldest.key)
+                runCatching { eldest.value.stopWatching() }
+            }
+            observers[path] = obs
+        }
         runCatching { obs.startWatching() }
     }
 
@@ -114,7 +131,9 @@ class RealtimeService : Service() {
                         if (target.isFile && !isProtected(target)) scanNow(target)
                     }
                     masked and (FileObserver.DELETE_SELF or FileObserver.MOVE_SELF) != 0 -> {
-                        observers.remove(target.absolutePath)?.stopWatching()
+                        synchronized(obsLock) {
+                            observers.remove(target.absolutePath)
+                        }?.stopWatching()
                     }
                 }
             }
@@ -171,8 +190,7 @@ class RealtimeService : Service() {
     }
 
     override fun onDestroy() {
-        observers.values.forEach { runCatching { it.stopWatching() } }
-        observers.clear()
+        stopAllObservers()
         Prefs.realtimeEnabled = false
         scope.cancel()
         super.onDestroy()

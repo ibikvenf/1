@@ -145,6 +145,10 @@
     <string name="settings_auto_update_desc">Only applies to enabled sources</string>
     <string name="settings_incremental">Incremental quick scan</string>
     <string name="settings_incremental_desc">Only files created/modified after the last scan are hashed; apps are always fully scanned</string>
+    <string name="settings_daily_scan">Daily automatic full scan</string>
+    <string name="settings_daily_scan_desc">Runs a full scan around 3 AM every day (inexact alarm, battery-friendly)</string>
+    <string name="audit_search_hint">Search by name / package / reason</string>
+    <string name="scan_speed_fmt"> · ~%1$d/s</string>
     <string name="settings_battery">Keep alive in background</string>
     <string name="settings_battery_desc">Exempt real-time protection from battery restrictions so OEM skins can't kill it</string>
     <string name="btn_battery_whitelist">Ignore battery optimizations</string>

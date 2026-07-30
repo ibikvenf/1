@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,11 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** 应用风险审计：按启发式评分排序展示。 */
+/** 应用风险审计：按启发式评分排序展示，支持按名称/包名/原因搜索。 */
 class AppsActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityAppsBinding
-    private val data = ArrayList<AppRisk>()
+    private val all = ArrayList<AppRisk>()
+    private val shown = ArrayList<AppRisk>()
+    private lateinit var adapter: RiskAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,16 +39,19 @@ class AppsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         b.toolbar.setNavigationOnClickListener { finish() }
 
+        adapter = RiskAdapter(shown) { showDetail(it) }
         b.recycler.layoutManager = LinearLayoutManager(this)
-        b.recycler.adapter = RiskAdapter(data) { showDetail(it) }
+        b.recycler.adapter = adapter
+
+        b.editSearch.doOnTextChanged { _, _, _, _ -> applyFilter() }
 
         b.progress.show()
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) { audit() }
             b.progress.hide()
-            data.clear()
-            data.addAll(result)
-            b.recycler.adapter?.notifyDataSetChanged()
+            all.clear()
+            all.addAll(result)
+            applyFilter()
             b.tvSummary.text = getString(
                 R.string.audit_summary_fmt,
                 result.size,
@@ -53,6 +59,18 @@ class AppsActivity : AppCompatActivity() {
                 result.count { it.level == ThreatLevel.MEDIUM },
             )
         }
+    }
+
+    /** 按关键字过滤（应用名 / 包名 / 评分原因，忽略大小写）。 */
+    private fun applyFilter() {
+        val q = b.editSearch.text?.toString()?.trim()?.lowercase().orEmpty()
+        shown.clear()
+        shown += if (q.isEmpty()) all else all.filter { r ->
+            r.appName.lowercase().contains(q) ||
+                r.packageName.lowercase().contains(q) ||
+                r.reasons.any { it.lowercase().contains(q) }
+        }
+        adapter.notifyDataSetChanged()
     }
 
     private fun audit(): List<AppRisk> {

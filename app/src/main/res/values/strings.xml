@@ -158,6 +158,10 @@
     <string name="settings_auto_update_desc">仅在启用签名来源时生效</string>
     <string name="settings_incremental">快速扫描使用增量模式</string>
     <string name="settings_incremental_desc">只查杀上次扫描之后新增或修改的文件，速度快一个数量级；应用始终全量查杀</string>
+    <string name="settings_daily_scan">每日定时全盘查杀</string>
+    <string name="settings_daily_scan_desc">每天凌晨 3 点左右自动执行一次全盘查杀（不精确闹钟，省电不打扰）</string>
+    <string name="audit_search_hint">按名称 / 包名 / 原因搜索</string>
+    <string name="scan_speed_fmt"> · ~%1$d项/s</string>
     <string name="settings_battery">后台保活（厂商系统必开）</string>
     <string name="settings_battery_desc">为实时防护关闭电池限制，避免小米/华为/OPPO 等系统杀后台</string>
     <string name="btn_battery_whitelist">忽略电池优化</string>

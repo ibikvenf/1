@@ -9,6 +9,7 @@ import com.aegis.av.BuildConfig
 import com.aegis.av.R
 import com.aegis.av.data.Prefs
 import com.aegis.av.databinding.ActivitySettingsBinding
+import com.aegis.av.util.ScanScheduler
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -38,6 +39,13 @@ class SettingsActivity : AppCompatActivity() {
         b.switchIncremental.setOnCheckedChangeListener(null)
         b.switchIncremental.isChecked = Prefs.incrementalQuick
         b.switchIncremental.setOnCheckedChangeListener { _, c -> Prefs.incrementalQuick = c }
+
+        b.switchDailyScan.setOnCheckedChangeListener(null)
+        b.switchDailyScan.isChecked = Prefs.autoScanDaily
+        b.switchDailyScan.setOnCheckedChangeListener { _, c ->
+            Prefs.autoScanDaily = c
+            if (c) ScanScheduler.schedule(this) else ScanScheduler.cancel(this)
+        }
 
         b.btnBattery.setOnClickListener {
             runCatching {
