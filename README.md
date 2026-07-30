@@ -5,8 +5,14 @@
 
 ## 📦 安装包下载（CI 自动构建）
 
-仓库配置了 GitHub Actions（`.github/workflows/android.yml`），每次推送自动：
+仓库附带了构建流水线定义 **`ci/android-build.yml`**，每次推送自动：
 **跑单元测试 → 编译 Debug APK → 上传工件**
+
+首次使用需一次性启用流水线（30 秒）：
+1. 打开仓库网页 → `ci/android-build.yml`
+2. 点击编辑（铅笔），把文件路径改为 **`.github/workflows/android-build.yml`** 并提交
+   （工作流文件必须位于该目录，GitHub 网页端操作会自动获得 workflows 权限）
+3. 完成！此后每次推送自动构建
 
 下载方式（任选其一）：
 
