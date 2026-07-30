@@ -7,13 +7,16 @@
 
 | 模块 | 能力 |
 | ---- | ---- |
-| **病毒查杀** | 快速扫描（高危目录）/ 全盘扫描（全部共享存储）/ 已安装应用 APK 查杀 |
+| **病毒查杀** | 快速扫描（应用全量 + 存储**增量**：仅查上次扫描后变化的文件）/ 全盘扫描（全量）|
 | **签名引擎** | ClamAV 兼容 `.hdb`(MD5) / `.hsb`(SHA-1/SHA-256)，`哈希:大小:名称`，HashMap O(1) 查询 |
-| **单遍哈希** | 文件只读一遍同时算出 MD5/SHA-1/SHA-256，极大减少 IO |
+| **黑名单引擎** | 自研 `blacklist.txt`：包名前缀规则 + 签名证书 SHA-256 指纹（打击换壳/家族木马）|
+| **单遍哈希** | 文件只读一遍同时算出 MD5/SHA-1/SHA-256；分享内容经 `content://` 流式查杀不落盘 |
 | **实时防护** | 递归 `FileObserver` 监控存储写入/移动；新装/更新应用即刻查杀（`PACKAGE_ADDED`） |
+| **分享查杀** | 任意 App 可分享文件/文本给宙斯盾即时查杀（`ACTION_SEND` / `ACTION_VIEW`）|
 | **启发式审计** | 危险权限组合 + 安装来源评分，画出"木马画像"，列出高/中风险应用 |
 | **病毒库更新** | 多来源 HTTPS 下载、`If-Modified-Since` 条件请求（304 跳过）、临时文件原子替换 |
 | **隔离区** | 可疑文件移入私有目录加锁，可还原/彻底删除 |
+| **处置闭环** | 结果按等级排序；卸载回执校验；历史记录保存威胁快照可回看 |
 | **离线隐私** | 全程本地查杀，文件哈希永不离开设备；网络只用于更新病毒库 |
 
 ## 技术栈
@@ -34,6 +37,9 @@
 ```bash
 # 或使用已有 Gradle 命令行构建
 ./gradlew assembleDebug
+
+# 运行纯 JVM 单元测试（签名库解析 + 哈希向量，含 EICAR 公开哈希断言）
+./gradlew testDebugUnitTest
 ```
 
 ## 验证查杀能力（无需真实病毒）
@@ -51,23 +57,26 @@
 app/src/main/java/com/aegis/av/
 ├── AegisApp.kt                 # 应用入口：通知渠道 / Prefs / 签名仓库初始化
 ├── engine/
-│   ├── HashEngine.kt           # 单遍 MD5/SHA-1/SHA-256
-│   ├── ScannerEngine.kt        # 扫描编排 + 文件遍历 + 取消协作
-│   └── HeuristicAnalyzer.kt    # 权限画像评分（自研规则）
+│   ├── HashEngine.kt           # 单遍 MD5/SHA-1/SHA-256（文件/流/字节三入口）
+│   ├── ScannerEngine.kt        # 扫描编排 + 文件遍历 + 增量过滤 + 取消协作 + 黑名单
+│   └── HeuristicAnalyzer.kt    # 权限画像评分 + 签名证书指纹提取（自研规则）
 ├── data/
 │   ├── SignatureDatabase.kt    # ClamAV hsb/hdb 解析 + O(1) 查询
-│   ├── SignatureRepository.kt  # 内置库拷贝、合并加载、来源管理
+│   ├── BlacklistDb.kt          # 包名前缀 / 证书指纹黑名单
+│   ├── SignatureRepository.kt  # 内置库拷贝、合并加载（带缓存）、来源管理
 │   ├── QuarantineStore.kt      # 隔离区
-│   ├── HistoryStore.kt         # 扫描历史（JSON）
+│   ├── HistoryStore.kt         # 扫描历史 + 威胁快照（JSON）
 │   └── Prefs.kt / ScanModels.kt
 ├── update/DatabaseUpdater.kt   # 条件请求 + 原子落盘 + 格式校验
 ├── service/
-│   ├── ScanService.kt          # 前台扫描服务 + 进度通知 + StateFlow
-│   └── RealtimeService.kt      # 递归 FileObserver 实时防护
+│   ├── ScanService.kt          # 前台扫描服务（全量/增量）+ 进度通知 + StateFlow
+│   └── RealtimeService.kt      # 递归 FileObserver 实时防护（写入即查 + 去抖）
 ├── receiver/
-│   ├── InstallReceiver.kt      # 新装应用即时查杀
+│   ├── InstallReceiver.kt      # 新装应用即时查杀（含黑名单）
 │   └── BootReceiver.kt         # 开机恢复实时防护
-└── ui/                         # 主页/扫描/结果/审计/历史/病毒库/隔离区/设置
+└── ui/                         # 主页/扫描/结果/审计/历史/病毒库/隔离区/设置/分享查杀
+
+app/src/test/java/com/aegis/av/ # JVM 单元测试（SignatureDatabase / HashEngine）
 ```
 
 ## 病毒库接入生产数据
@@ -77,6 +86,13 @@ app/src/main/java/com/aegis/av/
 ```
 <sha256>:<size|*>:<Malware.Name>      # .hsb
 <md5>:<size|*>:<Malware.Name>         # .hdb
+```
+
+自有黑名单（`blacklist.txt`，与签名库同目录合并生效）：
+
+```
+pkg:com.evil.fakebank                 # 包名前缀
+cert:<64位小写sha256>                 # 签名证书指纹
 ```
 
 在"病毒库管理 → 添加来源"填入自托管地址即可；适合接入内网威胁情报平台每日导出的哈希库。
@@ -89,7 +105,9 @@ app/src/main/java/com/aegis/av/
 
 ## 路线图（参考 Hypatia Roadmap）
 
-- [ ] 分享/打开文件时联动查杀（Intent.ACTION_VIEW / SEND）
+- [x] 分享/打开文件时联动查杀（Intent.ACTION_VIEW / SEND）✅ 已实现
+- [x] 包名 / 证书黑名单（超越 ClamAV 哈希库的自研特征）✅ 已实现
+- [x] 增量快速扫描 ✅ 已实现
 - [ ] ClamAV 全文特征（.ndb）支持
 - [ ] Root 模式下扫描 /system 分区
 - [ ] 签名库签名校验（.sig）

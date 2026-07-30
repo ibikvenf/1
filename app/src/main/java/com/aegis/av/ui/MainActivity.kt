@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity() {
         // 存储权限提示条
         b.btnGrantStorage.setOnClickListener { Perms.requestStorageAccess(this) }
 
+        // 未处理威胁 -> 处理页
+        b.btnHandleThreat.setOnClickListener { open(ResultsActivity::class.java) }
+
         b.btnEicarHelp.setOnClickListener { showEicarDialog() }
     }
 
@@ -117,10 +120,25 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.last_scan_fmt, df.format(Date(lastScan)))
         else getString(R.string.last_scan_never)
 
-        val (sigCount, dbTime) = SignatureRepository.info()
-        b.tvDbInfo.text = if (dbTime > 0)
-            getString(R.string.db_info_fmt, sigCount, df.format(Date(dbTime)))
-        else getString(R.string.db_info_builtin_fmt, sigCount)
+        // 病毒库信息与未处理威胁横幅（IO 操作放后台线程）
+        val lastScanSeen = lastScan
+        lifecycleScope.launch {
+            val dbInfo = withContext(Dispatchers.IO) { SignatureRepository.info() }
+            val entry = withContext(Dispatchers.IO) {
+                com.aegis.av.data.HistoryStore.load(applicationContext).firstOrNull()
+            }
+            b.tvDbInfo.text = if (dbInfo.second > 0)
+                getString(R.string.db_info_fmt, dbInfo.first, df.format(Date(dbInfo.second)))
+            else getString(R.string.db_info_builtin_fmt, dbInfo.first)
+
+            val openCount = entry?.summary
+                ?.takeIf { it.threatCount > 0 && it.finishedAt == lastScanSeen }
+                ?.threatCount ?: 0
+            b.layoutThreatBanner.visibility = if (openCount > 0) View.VISIBLE else View.GONE
+            if (openCount > 0) {
+                b.tvThreatBanner.text = getString(R.string.banner_threats_fmt, openCount)
+            }
+        }
 
         b.switchRealtime.setOnCheckedChangeListener(null)
         b.switchRealtime.isChecked = realtime

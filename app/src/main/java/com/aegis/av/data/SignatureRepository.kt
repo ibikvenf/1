@@ -31,6 +31,10 @@ object SignatureRepository {
     private var cached: SignatureDatabase? = null
     private var cacheStamp = 0L
 
+    @Volatile
+    private var cachedBlacklist: BlacklistDb? = null
+    private var blackStamp = 0L
+
     fun init(context: Context) {
         app = context.applicationContext
         copyBundledIfNeeded()
@@ -42,7 +46,9 @@ object SignatureRepository {
         runCatching {
             val names = app.assets.list(ASSET_DIR) ?: return
             for (name in names) {
-                if (!name.endsWith(".hsb") && !name.endsWith(".hdb")) continue
+                val isSig = name.endsWith(".hsb") || name.endsWith(".hdb")
+                val isBlacklist = name == "blacklist.txt"
+                if (!isSig && !isBlacklist) continue
                 val out = File(dbDir(), "builtin_$name")
                 if (out.exists() && out.length() > 0) continue
                 app.assets.open("$ASSET_DIR/$name").use { ins ->
@@ -68,8 +74,25 @@ object SignatureRepository {
         return db
     }
 
+    /** 加载黑名单库（包名前缀 + 证书指纹），同样带 5 秒缓存。 */
+    @Synchronized
+    fun blacklist(): BlacklistDb {
+        val now = SystemClock.elapsedRealtime()
+        cachedBlacklist?.let { if (now - blackStamp < KEY_CACHE_MS) return it }
+        val db = BlacklistDb()
+        dbDir().listFiles()?.forEach { f ->
+            if (f.name.endsWith("blacklist.txt")) runCatching { db.load(f) }
+        }
+        cachedBlacklist = db
+        blackStamp = now
+        return db
+    }
+
     fun invalidate() {
-        synchronized(this) { cacheStamp = 0L }
+        synchronized(this) {
+            cacheStamp = 0L
+            blackStamp = 0L
+        }
     }
 
     fun info(): Pair<Int, Long> = load().signatureCount to Prefs.dbLastUpdate

@@ -2,13 +2,14 @@ package com.aegis.av.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.aegis.av.R
 import com.aegis.av.data.HistoryStore
-import com.aegis.av.data.ScanSummary
 import com.aegis.av.databinding.ActivityHistoryBinding
 import com.aegis.av.databinding.ItemHistoryBinding
 import java.text.DateFormat
@@ -38,12 +39,30 @@ class HistoryActivity : AppCompatActivity() {
 
     private fun reload() {
         val list = HistoryStore.load(this)
-        b.recycler.adapter = HistoryAdapter(list)
-        b.tvEmpty.visibility = if (list.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        b.recycler.adapter = HistoryAdapter(list) { entry -> showDetail(entry) }
+        b.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    class HistoryAdapter(private val data: List<ScanSummary>) :
-        RecyclerView.Adapter<HistoryAdapter.Holder>() {
+    private fun showDetail(entry: HistoryStore.HistoryEntry) {
+        val threats = entry.threats.orEmpty()
+        val msg = if (threats.isEmpty()) {
+            getString(R.string.history_no_threats)
+        } else {
+            threats.joinToString("\n\n") { "• ${it.title}\n${it.detail}" }
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.history_detail_title)
+            .setMessage(msg)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    // ---------------------------------------------------------------------
+
+    class HistoryAdapter(
+        private val data: List<HistoryStore.HistoryEntry>,
+        val onClick: (HistoryStore.HistoryEntry) -> Unit,
+    ) : RecyclerView.Adapter<HistoryAdapter.Holder>() {
 
         class Holder(val binding: ItemHistoryBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -55,7 +74,8 @@ class HistoryActivity : AppCompatActivity() {
         override fun getItemCount(): Int = data.size
 
         override fun onBindViewHolder(h: Holder, position: Int) {
-            val s = data[position]
+            val entry = data[position]
+            val s = entry.summary ?: return
             val ctx = h.binding.root.context
             h.binding.tvTime.text = df.format(Date(s.finishedAt))
             val secs = (s.finishedAt - s.startedAt) / 1000
@@ -66,6 +86,7 @@ class HistoryActivity : AppCompatActivity() {
                 R.string.history_item_fmt,
                 status, s.scannedApps, s.scannedFiles, s.threatCount, secs,
             )
+            h.binding.root.setOnClickListener { onClick(entry) }
         }
     }
 }

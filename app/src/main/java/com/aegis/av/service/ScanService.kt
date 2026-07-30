@@ -62,8 +62,14 @@ class ScanService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_QUICK -> begin(scanApps = true, roots = ScannerEngine.quickScanRoots())
-            ACTION_FULL -> begin(scanApps = true, roots = ScannerEngine.fullScanRoots())
+            // 快速扫描：应用全量 + 存储增量（仅上次扫描后变化的文件）
+            ACTION_QUICK -> begin(
+                scanApps = true,
+                roots = ScannerEngine.fullScanRoots(),
+                sinceMillis = if (Prefs.incrementalQuick) Prefs.lastScanTime else 0L,
+            )
+            // 全盘扫描：应用 + 存储全量
+            ACTION_FULL -> begin(scanApps = true, roots = ScannerEngine.fullScanRoots(), sinceMillis = 0L)
             ACTION_STOP -> {
                 job?.cancel()
                 engine?.requestCancel()
@@ -72,7 +78,7 @@ class ScanService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun begin(scanApps: Boolean, roots: List<File>) {
+    private fun begin(scanApps: Boolean, roots: List<File>, sinceMillis: Long) {
         if (job?.isActive == true) return // 已有扫描进行中
         startForeground(Notify.ID_SCAN, progressNotification(getString(R.string.scan_preparing)))
 
@@ -80,14 +86,14 @@ class ScanService : Service() {
         engine = eng
         job = scope.launch {
             try {
-                val result = eng.start(scanApps, roots) { s ->
+                val result = eng.start(scanApps, roots, sinceMillis) { s ->
                     state.value = s
                     maybeNotifyProgress(s)
                 }
                 lastThreats = result.threats
                 lastSummary = result.summary
                 Prefs.lastScanTime = result.summary.finishedAt
-                HistoryStore.add(applicationContext, result.summary)
+                HistoryStore.add(applicationContext, result.summary, result.threats)
                 notifyFinished(result, cancelled = result.summary.cancelled)
             } catch (ce: CancellationException) {
                 eng.requestCancel()

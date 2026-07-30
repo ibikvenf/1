@@ -119,6 +119,22 @@ object HeuristicAnalyzer {
         }
     }
 
+    /** 应用签名证书的 SHA-256（用于证书指纹黑名单）。 */
+    fun signingCertSha256(context: Context, packageName: String): String? {
+        return runCatching {
+            val pm = context.packageManager
+            if (Build.VERSION.SDK_INT >= 28) {
+                val pi = pm.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+                val info = pi.signingInfo ?: return null
+                val signers = info.apkContentsSigners ?: info.signingCertificateHistory
+                signers?.firstOrNull()?.toByteArray()?.let { HashEngine.sha256Hex(it) }
+            } else {
+                val pi = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+                pi.signatures?.firstOrNull()?.toByteArray()?.let { HashEngine.sha256Hex(it) }
+            }
+        }.getOrNull()
+    }
+
     @SuppressLint("QueryAllPackagesNeeded")
     @Suppress("DEPRECATION")
     fun installedPackages(context: Context, withPermissions: Boolean): List<PackageInfo> {

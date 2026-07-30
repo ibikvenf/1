@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +27,21 @@ class ResultsActivity : AppCompatActivity() {
     private val items = ArrayList<Threat>()
     private lateinit var adapter: ThreatsAdapter
 
+    /** 卸载回执：返回后校验应用是否确实已卸载。 */
+    private var pendingUninstallPkg: String? = null
+    private val uninstallLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) {
+        val pkg = pendingUninstallPkg ?: return@registerForActivityResult
+        pendingUninstallPkg = null
+        val stillThere = runCatching { packageManager.getPackageInfo(pkg, 0) }.isSuccess
+        Toast.makeText(
+            this,
+            if (stillThere) R.string.toast_uninstall_failed else R.string.toast_deleted,
+            Toast.LENGTH_SHORT,
+        ).show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityResultsBinding.inflate(layoutInflater)
@@ -35,7 +51,8 @@ class ResultsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         b.toolbar.setNavigationOnClickListener { finish() }
 
-        items.addAll(com.aegis.av.service.ScanService.lastThreats)
+        // 按威胁等级排序：病毒 > 高 > 中 > 低（枚举声明序即优先级）
+        items.addAll(com.aegis.av.service.ScanService.lastThreats.sortedBy { it.level })
         adapter = ThreatsAdapter(items,
             onUninstall = { t, pos -> uninstall(t, pos) },
             onQuarantine = { t, pos -> quarantine(t, pos) },
@@ -55,11 +72,13 @@ class ResultsActivity : AppCompatActivity() {
     private fun uninstall(t: Threat, pos: Int) {
         val pkg = t.packageName ?: return
         runCatching {
-            startActivity(
+            pendingUninstallPkg = pkg
+            uninstallLauncher.launch(
                 Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.parse("package:$pkg"))
                     .putExtra(Intent.EXTRA_RETURN_RESULT, true)
             )
         }.onFailure {
+            pendingUninstallPkg = null
             Toast.makeText(this, R.string.toast_action_failed, Toast.LENGTH_SHORT).show()
         }
         removeAt(pos)

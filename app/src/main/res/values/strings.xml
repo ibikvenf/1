@@ -80,6 +80,22 @@
     <string name="risk_detail_fmt">应用：%1$s · 风险分 %2$d\n%3$s</string>
     <string name="threat_file_detail_fmt">文件：%1$s\nSHA-256：%2$s</string>
     <string name="threat_app_detail_fmt">应用：%1$s（%2$s）\nSHA-256：%3$s</string>
+    <string name="blacklist_pkg_title">黑名单应用</string>
+    <string name="blacklist_pkg_fmt">应用：%1$s（%2$s）\n命中包名黑名单规则：%3$s</string>
+    <string name="blacklist_cert_title">恶意签名证书</string>
+    <string name="blacklist_cert_fmt">应用：%1$s（%2$s）\n签名证书指纹命中黑名单：%3$s</string>
+    <string name="toast_uninstall_failed">应用仍在，请手动卸载</string>
+
+    <!-- 主页威胁横幅 -->
+    <string name="banner_threats_fmt">上次扫描发现 %1$d 项威胁，尚未全部处理</string>
+    <string name="banner_handle">立即处理</string>
+
+    <!-- 分享查杀 -->
+    <string name="share_scanning">正在查杀…</string>
+    <string name="share_result_title">分享查杀</string>
+    <string name="share_no_content">未收到可扫描的内容</string>
+    <string name="share_safe_fmt">✅ 安全：%1$s\nSHA-256：%2$s</string>
+    <string name="share_threat_fmt">⚠️ 检测到病毒：%1$s\n威胁名：%2$s\nSHA-256：%3$s</string>
 
     <!-- 告警 -->
     <string name="alert_threats_found_title">发现安全威胁！</string>
@@ -106,6 +122,8 @@
     <string name="empty_history">暂无历史记录</string>
     <string name="btn_clear_history">清空历史</string>
     <string name="history_item_fmt">%1$s · 应用 %2$d · 文件 %3$d · 威胁 %4$d · 用时 %5$ds</string>
+    <string name="history_detail_title">威胁明细</string>
+    <string name="history_no_threats">该次扫描未发现威胁</string>
 
     <!-- 病毒库管理 -->
     <string name="title_update">病毒库管理</string>
@@ -138,6 +156,11 @@
     <string name="settings_system_apps_desc">默认跳过系统应用以减少耗时与误报</string>
     <string name="settings_auto_update">打开应用时自动更新病毒库</string>
     <string name="settings_auto_update_desc">仅在启用签名来源时生效</string>
+    <string name="settings_incremental">快速扫描使用增量模式</string>
+    <string name="settings_incremental_desc">只查杀上次扫描之后新增或修改的文件，速度快一个数量级；应用始终全量查杀</string>
+    <string name="settings_battery">后台保活（厂商系统必开）</string>
+    <string name="settings_battery_desc">为实时防护关闭电池限制，避免小米/华为/OPPO 等系统杀后台</string>
+    <string name="btn_battery_whitelist">忽略电池优化</string>
     <string name="settings_max_file">单文件大小上限</string>
     <string name="settings_max_file_value">%1$d MB</string>
     <string name="settings_system_settings">系统应用设置</string>

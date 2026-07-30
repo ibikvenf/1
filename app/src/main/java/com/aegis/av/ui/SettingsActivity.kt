@@ -35,6 +35,19 @@ class SettingsActivity : AppCompatActivity() {
         b.switchAutoUpdate.isChecked = Prefs.autoUpdateDb
         b.switchAutoUpdate.setOnCheckedChangeListener { _, c -> Prefs.autoUpdateDb = c }
 
+        b.switchIncremental.setOnCheckedChangeListener(null)
+        b.switchIncremental.isChecked = Prefs.incrementalQuick
+        b.switchIncremental.setOnCheckedChangeListener { _, c -> Prefs.incrementalQuick = c }
+
+        b.btnBattery.setOnClickListener {
+            runCatching {
+                startActivity(
+                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                        .setData(Uri.parse("package:$packageName"))
+                )
+            }
+        }
+
         b.sliderMaxFile.value = Prefs.maxFileMb.coerceIn(16, 2048).toFloat()
         b.tvMaxFileValue.text = getString(R.string.settings_max_file_value, Prefs.maxFileMb)
         b.sliderMaxFile.addOnChangeListener { _, value, _ ->

@@ -76,6 +76,20 @@
     <string name="risk_detail_fmt">App: %1$s · score %2$d\n%3$s</string>
     <string name="threat_file_detail_fmt">File: %1$s\nSHA-256: %2$s</string>
     <string name="threat_app_detail_fmt">App: %1$s (%2$s)\nSHA-256: %3$s</string>
+    <string name="blacklist_pkg_title">Blacklisted app</string>
+    <string name="blacklist_pkg_fmt">App: %1$s (%2$s)\nMatched package blacklist rule: %3$s</string>
+    <string name="blacklist_cert_title">Malicious signing certificate</string>
+    <string name="blacklist_cert_fmt">App: %1$s (%2$s)\nSigning cert fingerprint is blacklisted: %3$s</string>
+    <string name="toast_uninstall_failed">App still installed — please remove manually</string>
+
+    <string name="banner_threats_fmt">Last scan found %1$d threats that are not fully handled</string>
+    <string name="banner_handle">Handle now</string>
+
+    <string name="share_scanning">Scanning…</string>
+    <string name="share_result_title">Share scan</string>
+    <string name="share_no_content">Nothing to scan was received</string>
+    <string name="share_safe_fmt">✅ Safe: %1$s\nSHA-256: %2$s</string>
+    <string name="share_threat_fmt">⚠️ Malware found: %1$s\nThreat: %2$s\nSHA-256: %3$s</string>
 
     <string name="alert_threats_found_title">Threats detected!</string>
     <string name="alert_threats_found_fmt">%1$d threats found in this scan. Top: %2$s. Tap to handle.</string>
@@ -98,6 +112,8 @@
     <string name="empty_history">No history yet</string>
     <string name="btn_clear_history">Clear history</string>
     <string name="history_item_fmt">%1$s · apps %2$d · files %3$d · threats %4$d · %5$ds</string>
+    <string name="history_detail_title">Threat details</string>
+    <string name="history_no_threats">No threats were found in that scan</string>
 
     <string name="title_update">Database manager</string>
     <string name="sources_title">Signature sources</string>
@@ -127,6 +143,11 @@
     <string name="settings_system_apps_desc">Skipped by default to save time and reduce false positives</string>
     <string name="settings_auto_update">Auto-update database on launch</string>
     <string name="settings_auto_update_desc">Only applies to enabled sources</string>
+    <string name="settings_incremental">Incremental quick scan</string>
+    <string name="settings_incremental_desc">Only files created/modified after the last scan are hashed; apps are always fully scanned</string>
+    <string name="settings_battery">Keep alive in background</string>
+    <string name="settings_battery_desc">Exempt real-time protection from battery restrictions so OEM skins can't kill it</string>
+    <string name="btn_battery_whitelist">Ignore battery optimizations</string>
     <string name="settings_max_file">Max file size</string>
     <string name="settings_max_file_value">%1$d MB</string>
     <string name="settings_system_settings">System app settings</string>

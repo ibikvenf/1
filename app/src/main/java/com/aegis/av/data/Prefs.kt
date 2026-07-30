@@ -17,6 +17,7 @@ object Prefs {
     private const val KEY_IGNORED = "ignored_threats"
     private const val KEY_DB_UPDATED = "db_last_update"
     private const val KEY_SOURCES = "db_sources"
+    private const val KEY_INCREMENTAL = "incremental_quick"
 
     private lateinit var prefs: SharedPreferences
 
@@ -41,6 +42,11 @@ object Prefs {
     var scanSystemApps: Boolean
         get() = p.getBoolean(KEY_SCAN_SYSTEM_APPS, false)
         set(v) = p.edit().putBoolean(KEY_SCAN_SYSTEM_APPS, v).apply()
+
+    /** 快速扫描是否仅检查上次扫描后发生变化的文件。 */
+    var incrementalQuick: Boolean
+        get() = p.getBoolean(KEY_INCREMENTAL, true)
+        set(v) = p.edit().putBoolean(KEY_INCREMENTAL, v).apply()
 
     /** 超过该大小的文件跳过（避免超大文件拖慢扫描）。 */
     var maxFileMb: Int

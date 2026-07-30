@@ -9,6 +9,15 @@
         <item name="android:statusBarColor">@color/toolbar_bg</item>
     </style>
 
+    <!-- 分享查杀：半透明浮窗式 Activity -->
+    <style name="Theme.AegisAV.Translucent" parent="Theme.AegisAV">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
     <style name="Toolbar.Aegis" parent="Widget.Material3.Toolbar">
         <item name="android:background">@color/toolbar_bg</item>
         <item name="titleTextColor">@color/toolbar_text</item>
