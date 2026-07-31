@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#047857</color>
+    <color name="primary_dark">#065F46</color>
+    <color name="primary_container">#A7F3D0</color>
+    <color name="on_primary_container">#052E22</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="safe">#059669</color>
+    <color name="warn">#D97706</color>
+    <color name="danger">#DC2626</color>
+
+    <color name="toolbar_bg">@color/primary</color>
+    <color name="toolbar_text">@color/white</color>
+
+    <color name="launcher_bg">#065F46</color>
+
+    <color name="text_secondary">#6B7280</color>
+</resources>

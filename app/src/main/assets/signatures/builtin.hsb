@@ -1,0 +1,7 @@
+# AegisAV built-in signatures (ClamAV .hsb format: SHA1/SHA256:Size:Name)
+# EICAR standard anti-malware test file (harmless, https://www.eicar.org/)
+3395856ce81f2b7382dee72602f798b642f14140:*:Eicar-Test-Signature
+275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f:*:Eicar-Test-Signature
+# AegisAV harmless demo test string:  AegisAV-Test-String-Harmless-Demo-Signature
+177df138d247f867ba54f73fc9aa5fb11195e535:*:Aegis-Test-Signature
+3efafae8e6501ffc104e2edc90e6c1cb530475c803445a690271eb3bb9d24271:*:Aegis-Test-Signature

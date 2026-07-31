@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">宙斯盾安全</string>
+
+    <!-- 通知渠道 -->
+    <string name="channel_scan">病毒扫描</string>
+    <string name="channel_scan_desc">扫描进度与结果</string>
+    <string name="channel_guard">实时防护</string>
+    <string name="channel_alerts">威胁告警</string>
+    <string name="channel_alerts_desc">发现病毒或高风险应用时提醒</string>
+
+    <!-- 主页 -->
+    <string name="home_tagline">本地查杀 · 签名引擎 · 隐私零上传</string>
+    <string name="btn_quick_scan">快速扫描</string>
+    <string name="quick_scan_desc">应用 + 下载/文档等高危目录</string>
+    <string name="btn_full_scan">全盘扫描</string>
+    <string name="full_scan_desc">应用 + 全部共享存储文件</string>
+    <string name="perm_banner_text">尚未授予文件访问权限，文件查杀将无法进行</string>
+    <string name="btn_grant_storage">授予权限</string>
+    <string name="status_protected">已受保护</string>
+    <string name="status_partial">建议进行全盘扫描</string>
+    <string name="status_first_run">尚未扫描，立即开始首次查杀</string>
+    <string name="status_no_permission">保护未生效：缺少文件权限</string>
+    <string name="last_scan_fmt">上次扫描：%1$s</string>
+    <string name="last_scan_never">从未进行扫描</string>
+    <string name="realtime_title">实时防护</string>
+    <string name="realtime_desc">监控文件写入与新装应用，发现病毒立即告警</string>
+    <string name="db_card_title">病毒库</string>
+    <string name="db_info_fmt">%1$d 条签名 · 更新于 %2$s</string>
+    <string name="db_info_builtin_fmt">%1$d 条内置签名 · 尚未在线更新</string>
+    <string name="update_db">立即更新</string>
+    <string name="updating">更新中…</string>
+    <string name="feature_apps">应用风险审计</string>
+    <string name="feature_apps_desc">危险权限画像</string>
+    <string name="feature_quarantine">隔离区</string>
+    <string name="feature_quarantine_desc">被隔离的可疑文件</string>
+    <string name="feature_history">扫描历史</string>
+    <string name="feature_history_desc">历次查杀记录</string>
+    <string name="feature_update">病毒库管理</string>
+    <string name="feature_update_desc">签名源与在线更新</string>
+    <string name="feature_settings_desc">查杀行为与病毒库设置</string>
+    <string name="btn_eicar_help">如何测试杀毒功能？</string>
+    <string name="eicar_title">使用 EICAR 测试文件</string>
+    <string name="eicar_message">从 eicar.org 下载 EICAR 标准测试文件（完全无害）到「下载」目录，或安装任意包含它的应用，扫描器应报告“Eicar-Test-Signature”。内置签名库也包含本软件演示签名 Aegis-Test-Signature。</string>
+
+    <!-- 扫描 -->
+    <string name="title_scan">病毒扫描</string>
+    <string name="scan_preparing">正在准备…</string>
+    <string name="scan_running_title">正在查杀病毒</string>
+    <string name="phase_apps">正在查杀已安装应用</string>
+    <string name="phase_files">正在查杀文件</string>
+    <string name="scan_counts_fmt">应用 %1$d · 文件 %2$d · 威胁 %3$d</string>
+    <string name="scan_finished">扫描完成</string>
+    <string name="scan_cancelled">已取消</string>
+    <string name="scan_finished_fmt">应用 %1$d 个 · 文件 %2$d 个 · 发现威胁 %3$d 项</string>
+    <string name="cancel">取消</string>
+    <string name="stop">停止</string>
+    <string name="view_results_with_count">查看结果（%1$d 项威胁）</string>
+    <string name="auto_close_hint">未发现威胁，可放心使用</string>
+
+    <!-- 结果 -->
+    <string name="title_results">查杀结果</string>
+    <string name="empty_results">未发现威胁，设备很安全 🛡</string>
+    <string name="level_malware">病毒</string>
+    <string name="level_high">高风险</string>
+    <string name="level_medium">中风险</string>
+    <string name="level_low">低风险</string>
+    <string name="uninstall">卸载</string>
+    <string name="delete">删除</string>
+    <string name="delete_confirm_title">确认删除该文件？</string>
+    <string name="delete_confirm_msg">%1$s</string>
+    <string name="btn_quarantine_action">隔离</string>
+    <string name="btn_ignore_action">忽略</string>
+    <string name="toast_quarantined">已移入隔离区</string>
+    <string name="toast_deleted">已删除</string>
+    <string name="toast_ignored">已加入忽略名单，以后扫描不再提示</string>
+    <string name="toast_restored">已还原到原位置</string>
+    <string name="toast_action_failed">操作失败</string>
+    <string name="threat_risk_app">高风险应用（启发式）</string>
+    <string name="risk_detail_fmt">应用：%1$s · 风险分 %2$d\n%3$s</string>
+    <string name="threat_file_detail_fmt">文件：%1$s\nSHA-256：%2$s</string>
+    <string name="threat_app_detail_fmt">应用：%1$s（%2$s）\nSHA-256：%3$s</string>
+    <string name="blacklist_pkg_title">黑名单应用</string>
+    <string name="blacklist_pkg_fmt">应用：%1$s（%2$s）\n命中包名黑名单规则：%3$s</string>
+    <string name="blacklist_cert_title">恶意签名证书</string>
+    <string name="blacklist_cert_fmt">应用：%1$s（%2$s）\n签名证书指纹命中黑名单：%3$s</string>
+    <string name="toast_uninstall_failed">应用仍在，请手动卸载</string>
+
+    <!-- 主页威胁横幅 -->
+    <string name="banner_threats_fmt">上次扫描发现 %1$d 项威胁，尚未全部处理</string>
+    <string name="banner_handle">立即处理</string>
+
+    <!-- 分享查杀 -->
+    <string name="share_scanning">正在查杀…</string>
+    <string name="share_result_title">分享查杀</string>
+    <string name="share_no_content">未收到可扫描的内容</string>
+    <string name="share_safe_fmt">✅ 安全：%1$s\nSHA-256：%2$s</string>
+    <string name="share_threat_fmt">⚠️ 检测到病毒：%1$s\n威胁名：%2$s\nSHA-256：%3$s</string>
+
+    <!-- 告警 -->
+    <string name="alert_threats_found_title">发现安全威胁！</string>
+    <string name="alert_threats_found_fmt">本次扫描发现 %1$d 项威胁，首要威胁：%2$s，点击查看处理。</string>
+    <string name="alert_realtime_title">实时防护拦截</string>
+    <string name="alert_realtime_fmt">检测到病毒 %1$s\n%2$s</string>
+    <string name="alert_new_app_title">新装应用存在威胁</string>
+    <string name="alert_new_app_fmt">应用 %1$s 被识别为 %2$s，建议立即卸载。</string>
+
+    <!-- 实时防护 -->
+    <string name="guard_running_title">实时防护已开启</string>
+    <string name="guard_running_text">正在监控存储写入与新装应用</string>
+
+    <!-- 应用风险审计 -->
+    <string name="title_apps">应用风险审计</string>
+    <string name="audit_summary_fmt">共 %1$d 项关注对象 · 高 %2$d · 中 %3$d</string>
+    <string name="audit_score_fmt">风险分 %1$d</string>
+    <string name="audit_pkg_fmt">包名：%1$s</string>
+    <string name="audit_installer_fmt">安装来源：%1$s</string>
+    <string name="unknown_source">未知来源</string>
+
+    <!-- 历史 -->
+    <string name="title_history">扫描历史</string>
+    <string name="empty_history">暂无历史记录</string>
+    <string name="btn_clear_history">清空历史</string>
+    <string name="history_item_fmt">%1$s · 应用 %2$d · 文件 %3$d · 威胁 %4$d · 用时 %5$ds</string>
+    <string name="history_detail_title">威胁明细</string>
+    <string name="history_no_threats">该次扫描未发现威胁</string>
+
+    <!-- 病毒库管理 -->
+    <string name="title_update">病毒库管理</string>
+    <string name="sources_title">签名来源</string>
+    <string name="btn_add_source">添加来源</string>
+    <string name="btn_update_now">立即更新</string>
+    <string name="add_source_title">添加签名来源</string>
+    <string name="source_name_hint">名称（如：自建病毒库）</string>
+    <string name="source_url_hint">URL（ClamAV .hsb/.hdb 格式）</string>
+    <string name="add">添加</string>
+    <string name="source_remove">删除</string>
+    <string name="update_no_sources">当前没有启用的签名来源。内置签名库始终有效。</string>
+    <string name="update_result_title">更新结果</string>
+    <string name="update_status_updated">已更新（%1$s）</string>
+    <string name="update_status_not_modified">已是最新，无需下载</string>
+    <string name="update_status_skipped">未启用，已跳过</string>
+    <string name="update_status_failed">失败：%1$s</string>
+
+    <!-- 隔离区 -->
+    <string name="title_quarantine">隔离区</string>
+    <string name="empty_quarantine">隔离区是空的</string>
+    <string name="quarantine_path_fmt">原位置：%1$s</string>
+    <string name="btn_restore">还原</string>
+
+    <!-- 设置 -->
+    <string name="title_settings">设置</string>
+    <string name="settings_heuristics">启发式查杀</string>
+    <string name="settings_heuristics_desc">对命中不到签名的应用按危险权限组合评分</string>
+    <string name="settings_system_apps">扫描系统应用</string>
+    <string name="settings_system_apps_desc">默认跳过系统应用以减少耗时与误报</string>
+    <string name="settings_auto_update">打开应用时自动更新病毒库</string>
+    <string name="settings_auto_update_desc">仅在启用签名来源时生效</string>
+    <string name="settings_incremental">快速扫描使用增量模式</string>
+    <string name="settings_incremental_desc">只查杀上次扫描之后新增或修改的文件，速度快一个数量级；应用始终全量查杀</string>
+    <string name="settings_daily_scan">每日定时全盘查杀</string>
+    <string name="settings_daily_scan_desc">每天凌晨 3 点左右自动执行一次全盘查杀（不精确闹钟，省电不打扰）</string>
+    <string name="audit_search_hint">按名称 / 包名 / 原因搜索</string>
+    <string name="scan_speed_fmt"> · ~%1$d项/s</string>
+    <string name="settings_battery">后台保活（厂商系统必开）</string>
+    <string name="settings_battery_desc">为实时防护关闭电池限制，避免小米/华为/OPPO 等系统杀后台</string>
+    <string name="btn_battery_whitelist">忽略电池优化</string>
+    <string name="settings_max_file">单文件大小上限</string>
+    <string name="settings_max_file_value">%1$d MB</string>
+    <string name="settings_system_settings">系统应用设置</string>
+    <string name="settings_about_title">关于宙斯盾安全</string>
+    <string name="settings_about_text">完全离线的本地查杀引擎：MD5/SHA-1/SHA-256 单遍哈希，ClamAV 兼容签名库，文件永不离开设备。架构思路参考开源项目 Divested-Mobile/Hypatia（GPL），代码为本工程原创实现。</string>
+    <string name="settings_version_fmt">版本 %1$s</string>
+</resources>
